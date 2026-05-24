@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FitChrono</string>
+    <string name="title_activity_main">FitChrono</string>
+    <string name="package_name">com.fitchrono.app</string>
+    <string name="custom_url_scheme">com.fitchrono.app</string>
+</resources>

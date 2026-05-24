@@ -1,0 +1,17 @@
+{
+  "name": "FitChrono - Cronómetro de Entrenamiento",
+  "short_name": "FitChrono",
+  "description": "Cronómetro para entrenamiento CrossFit: EMOM, Tabata, AMRAP, FOR TIME",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "appId": "com.fitchrono.app",
+  "appName": "FitChrono",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
