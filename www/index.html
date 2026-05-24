@@ -2,23 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>FitChrono - Cronómetro de Entrenamiento</title>
+    <title>FitChrono</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.png">
 </head>
 <body>
+    <div id="screen-flash"></div>
+    
     <div id="app">
-        <!-- HOME SCREEN -->
         <div id="home" class="screen active">
             <header>
-                <h1>FitChrono</h1>
-                <button id="settings-btn" class="icon-btn">⚙️</button>
-                <button id="theme-btn" class="icon-btn">🌙</button>
+                <h1>FITCHRONO</h1>
+                <div class="header-actions">
+                    <button id="settings-btn" class="icon-btn">⚙️</button>
+                    <button id="theme-btn" class="icon-btn">🌙</button>
+                </div>
             </header>
             
             <div id="workout-selector" class="workout-grid">
@@ -30,7 +33,7 @@
                 <button class="workout-card" data-type="tabata">
                     <span class="emoji">🔥</span>
                     <span class="name">TABATA</span>
-                    <span class="desc">20/10</span>
+                    <span class="desc">20/10 seg</span>
                 </button>
                 <button class="workout-card" data-type="amrap">
                     <span class="emoji">♾️</span>
@@ -50,52 +53,50 @@
                 <button class="workout-card" data-type="interval">
                     <span class="emoji">🔄</span>
                     <span class="name">INTERVAL</span>
-                    <span class="desc">Custom</span>
+                    <span class="desc">Personalizado</span>
                 </button>
             </div>
 
-            <div id="config-section" class="config-hidden">
-                <h2 id="config-title">Configura tu Workout</h2>
+            <div id="config-section">
+                <div id="config-title">SELECCIONA Y CONFIGURA</div>
                 <div id="config-fields"></div>
                 <button id="start-btn" class="btn-primary">▶ INICIAR</button>
             </div>
 
             <div id="presets-section">
-                <h3>⭐ Presets</h3>
+                <h3>⭐ Guardados</h3>
                 <div id="presets-list"></div>
             </div>
         </div>
 
-        <!-- TIMER SCREEN -->
         <div id="timer-screen" class="screen">
             <header>
                 <span id="workout-type-label">EMOM</span>
-                <div>
+                <div class="header-actions">
                     <button id="mute-btn" class="icon-btn">🔊</button>
-                    <button id="back-btn" class="icon-btn">⬅️</button>
+                    <button id="back-btn" class="icon-btn">✕</button>
                 </div>
             </header>
             
             <div id="timer-display">
-                <div id="time-main">00:00</div>
+                <div id="time-main" class="blink">00:00</div>
                 <div id="time-rounds">Ronda 1/10</div>
-                <div id="time-phase">PREPÁRATE</div>
-            </div>
-
-            <div id="timer-controls">
-                <button id="pause-btn" class="btn-secondary">⏸ PAUSA</button>
-                <button id="stop-btn" class="btn-danger">⏹ PARAR</button>
+                <div id="time-phase" class="countdown">PREPÁRATE</div>
             </div>
 
             <div id="round-counter">
-                <button id="round-btn" class="btn-round">+1 RONDA</button>
+                <button id="round-btn">+1 RONDA</button>
+            </div>
+
+            <div id="timer-controls">
+                <button id="pause-btn">⏸ PAUSA</button>
+                <button id="stop-btn">✕ PARAR</button>
             </div>
         </div>
 
-        <!-- SETTINGS OVERLAY -->
         <div id="settings-overlay" class="overlay">
             <div class="overlay-content">
-                <h2>⚙️ Ajustes</h2>
+                <h2>⚙️ AJUSTES</h2>
                 <div class="setting-row">
                     <span>Sonido</span>
                     <label class="toggle"><input type="checkbox" id="sound-toggle" checked><span class="slider"></span></label>
@@ -104,17 +105,12 @@
                     <span>Vibración</span>
                     <label class="toggle"><input type="checkbox" id="vibration-toggle" checked><span class="slider"></span></label>
                 </div>
-                <div class="setting-row">
-                    <span>Tema oscuro</span>
-                    <label class="toggle"><input type="checkbox" id="dark-toggle" checked><span class="slider"></span></label>
-                </div>
-                <button id="close-settings" class="btn-secondary">Cerrar</button>
+                <button id="close-settings" class="btn-primary">CERRAR</button>
             </div>
         </div>
 
-        <!-- FINISHED OVERLAY -->
         <div id="finished-overlay" class="overlay">
-            <div class="overlay-content finished">
+            <div class="overlay-content">
                 <h2>🏁 FINISHED!</h2>
                 <div id="final-time">00:00</div>
                 <div id="final-rounds"></div>
@@ -123,10 +119,10 @@
         </div>
     </div>
 
-    <script src="js/workouts.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/sounds.js"></script>
-    <script src="js/timer.js"></script>
-    <script src="js/app.js"></script>
+    <script src="workouts.js"></script>
+    <script src="storage.js"></script>
+    <script src="sounds.js"></script>
+    <script src="timer.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

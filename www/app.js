@@ -1,9 +1,16 @@
-// FitChrono - Main App Controller
+// FitChrono v2 - Main App Controller
 
 (function() {
     'use strict';
 
-    // DOM Elements
+    // State
+    let currentWorkoutType = null;
+    let currentConfig = {};
+    let soundEnabled = true;
+    let vibrationEnabled = true;
+    let muteEnabled = false;
+
+    // DOM refs
     const screens = {
         home: document.getElementById('home'),
         timer: document.getElementById('timer-screen')
@@ -14,50 +21,34 @@
         finished: document.getElementById('finished-overlay')
     };
     
-    // State
-    let currentWorkoutType = null;
-    let currentConfig = {};
-    let soundEnabled = true;
-    let vibrationEnabled = true;
-    let darkMode = true;
+    const screenFlash = document.getElementById('screen-flash');
 
     // Initialize
     function init() {
         loadSettings();
-        applyTheme();
         setupEventListeners();
         renderPresets();
-        
-        // Auto-select first workout type
         selectWorkoutType('emom');
+        
+        // Pre-init audio context on first touch
+        document.addEventListener('touchstart', () => soundManager.init(), { once: true });
+        document.addEventListener('click', () => soundManager.init(), { once: true });
     }
 
     function loadSettings() {
         const settings = storage.getSettings();
-        darkMode = settings.darkMode;
         soundEnabled = settings.sound;
         vibrationEnabled = settings.vibration;
         
         document.getElementById('sound-toggle').checked = soundEnabled;
         document.getElementById('vibration-toggle').checked = vibrationEnabled;
-        document.getElementById('dark-toggle').checked = darkMode;
-    }
-
-    function applyTheme() {
-        if (darkMode) {
-            document.body.removeAttribute('data-theme');
-        } else {
-            document.body.setAttribute('data-theme', 'light');
-        }
-        document.getElementById('theme-btn').textContent = darkMode ? '🌙' : '☀️';
     }
 
     function setupEventListeners() {
         // Workout type selection
         document.querySelectorAll('.workout-card').forEach(card => {
-            card.addEventListener('click', () => {
-                selectWorkoutType(card.dataset.type);
-            });
+            card.addEventListener('click', () => selectWorkoutType(card.dataset.type));
+            card.addEventListener('touchstart', () => {}, { once: true }); // fast response
         });
 
         // Start button
@@ -84,12 +75,6 @@
             storage.saveSetting('vibration', vibrationEnabled);
         });
         
-        document.getElementById('dark-toggle').addEventListener('change', (e) => {
-            darkMode = e.target.checked;
-            storage.saveSetting('dark', darkMode);
-            applyTheme();
-        });
-        
         document.getElementById('mute-btn').addEventListener('click', toggleMute);
 
         // Finished overlay
@@ -105,20 +90,16 @@
         });
         
         // Show config section
-        const configSection = document.getElementById('config-section');
-        configSection.classList.remove('config-hidden');
-        configSection.classList.add('config-visible');
+        document.getElementById('config-section').classList.add('visible');
         
         // Build config fields
-        document.getElementById('config-title').textContent = 
-            `${WORKOUT_TYPES[type].name} - ${WORKOUT_TYPES[type].description}`;
+        document.getElementById('config-title').textContent = WORKOUT_TYPES[type].description;
         document.getElementById('config-fields').innerHTML = buildConfigHTML(type);
     }
 
     function collectConfig() {
         const config = {};
-        const inputs = document.querySelectorAll('#config-fields input');
-        inputs.forEach(input => {
+        document.querySelectorAll('#config-fields input').forEach(input => {
             config[input.id] = parseInt(input.value) || 0;
         });
         return config;
@@ -139,13 +120,11 @@
         // Switch to timer screen
         switchScreen('timer');
         
-        // Update header label
-        document.getElementById('workout-type-label').textContent = 
-            WORKOUT_TYPES[currentWorkoutType].name;
+        // Update header
+        document.getElementById('workout-type-label').textContent = WORKOUT_TYPES[currentWorkoutType].name;
         
-        // Show/hide round button based on workout type
-        const roundBtn = document.getElementById('round-btn');
-        roundBtn.classList.toggle('visible', currentWorkoutType === 'amrap');
+        // Show/hide round button
+        document.getElementById('round-btn').classList.toggle('visible', currentWorkoutType === 'amrap');
         
         // Start timer
         soundManager.init();
@@ -160,71 +139,92 @@
         
         timeMain.textContent = timeDisplay;
         
-        // Handle countdown animation
+        // Remove previous state classes
+        timerDisplay.removeAttribute('data-phase');
+        timerDisplay.removeAttribute('data-state');
+        timeMain.classList.remove('countdown-anim', 'blink');
+        timePhase.classList.remove('work', 'rest', 'paused', 'countdown');
+        
         if (statusData.state === 'countdown') {
-            timeMain.classList.add('countdown-number');
-            timePhase.textContent = 'PREPÁRATE';
-            timePhase.removeAttribute('data-phase');
+            // Countdown state
+            timeMain.classList.add('countdown-anim');
+            timePhase.textContent = statusData.currentTime;
+            timePhase.classList.add('countdown');
             timeRounds.textContent = '';
             
             soundManager.beepCountdown();
             if (vibrationEnabled) soundManager.vibrate(50);
-        } else {
-            timeMain.classList.remove('countdown-number');
             
+        } else if (statusData.state === 'paused') {
+            // Paused state
+            timeMain.classList.add('blink');
+            timePhase.textContent = 'PAUSADO';
+            timePhase.classList.add('paused');
+            timerDisplay.setAttribute('data-state', 'paused');
+            timeRounds.textContent = `Ronda ${statusData.rounds || 1}`;
+            
+        } else if (statusData.state === 'running') {
+            // Running state
             if (statusData.isCountingUp) {
                 // AMRAP / FOR TIME
                 timeRounds.textContent = `Ronda ${statusData.roundCount}`;
                 timePhase.textContent = 'EN CURSO';
-                timePhase.setAttribute('data-phase', 'work');
+                timePhase.classList.add('work');
+                timerDisplay.setAttribute('data-phase', 'work');
             } else {
                 // EMOM, Tabata, Interval
-                const totalRounds = statusData.totalRounds || statusData.config.rounds || 0;
+                const totalRounds = statusData.config.rounds || statusData.totalRounds || 0;
                 timeRounds.textContent = `Ronda ${statusData.rounds}/${totalRounds}`;
-                timePhase.textContent = statusData.phase === 'rest' ? 'DESCANSO' : 'TRABAJO';
-                timePhase.setAttribute('data-phase', statusData.phase);
+                
+                if (statusData.phase === 'rest') {
+                    timePhase.textContent = 'DESCANSO';
+                    timePhase.classList.add('rest');
+                    timerDisplay.setAttribute('data-phase', 'rest');
+                } else {
+                    timePhase.textContent = 'TRABAJO';
+                    timePhase.classList.add('work');
+                    timerDisplay.setAttribute('data-phase', 'work');
+                }
             }
         }
-        
-        // Update timer display background
-        timerDisplay.setAttribute('data-state', statusData.state);
-        if (statusData.state === 'paused') {
-            timerDisplay.setAttribute('data-state', 'paused');
-        }
+    }
+
+    function flashScreen(phase) {
+        screenFlash.className = phase;
+        screenFlash.classList.add('active');
+        setTimeout(() => screenFlash.classList.remove('active'), 200);
     }
 
     function handlePhaseChange(phase, round) {
         if (phase === 'work') {
             soundManager.beepWorkStart();
             if (vibrationEnabled) soundManager.vibrateWork();
+            flashScreen('work');
         } else {
             soundManager.beepRestStart();
             if (vibrationEnabled) soundManager.vibrateRest();
+            flashScreen('rest');
         }
     }
 
     function handleMinuteMark(round) {
         soundManager.beepShort();
         if (vibrationEnabled) soundManager.vibrate(200);
+        flashScreen('work');
     }
 
     function handleWorkoutFinished(result) {
         soundManager.beepLong();
         if (vibrationEnabled) soundManager.vibrateEnd();
+        flashScreen('work');
         
         // Show finished overlay
-        document.getElementById('final-time').textContent = 
-            timer.formatTime(result.time);
+        document.getElementById('final-time').textContent = timer.formatTime(result.time);
         
         if (currentWorkoutType === 'amrap') {
-            document.getElementById('final-rounds').textContent = 
-                `${result.rounds} rondas completadas`;
-        } else if (currentWorkoutType === 'fortime') {
-            document.getElementById('final-rounds').textContent = 
-                `Time cap: ${result.config.cap} min`;
+            document.getElementById('final-rounds').textContent = `${result.roundCount} rondas completadas`;
         } else {
-            document.getElementById('final-rounds').textContent = 
-                `${result.rounds} rondas completadas`;
+            document.getElementById('final-rounds').textContent = `${result.rounds || result.roundCount} rondas`;
         }
         
         toggleOverlay('finished', true);
@@ -269,9 +269,9 @@
     }
 
     function toggleMute() {
-        soundEnabled = !soundEnabled;
-        soundManager.setEnabled(soundEnabled);
-        document.getElementById('mute-btn').textContent = soundEnabled ? '🔊' : '🔇';
+        muteEnabled = !muteEnabled;
+        soundManager.setEnabled(!muteEnabled);
+        document.getElementById('mute-btn').textContent = muteEnabled ? '🔇' : '🔊';
     }
 
     function renderPresets() {
@@ -279,7 +279,7 @@
         const list = document.getElementById('presets-list');
         
         if (presets.length === 0) {
-            list.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Sin presets guardados</p>';
+            list.innerHTML = '';
             return;
         }
         
@@ -287,26 +287,22 @@
             <div class="preset-item" data-id="${preset.id}">
                 <div>
                     <div class="preset-name">${preset.name}</div>
-                    <div class="preset-info">${WORKOUT_TYPES[preset.type]?.name || preset.type} - ${preset.configMinutes || ''} min</div>
+                    <div class="preset-info">${WORKOUT_TYPES[preset.type]?.name || preset.type}</div>
                 </div>
                 <button class="delete-btn" data-delete="${preset.id}">✕</button>
             </div>
         `).join('');
         
-        // Preset click handlers
         list.querySelectorAll('.preset-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target.classList.contains('delete-btn')) {
-                    const id = e.target.dataset.delete;
-                    storage.deletePreset(id);
+                    storage.deletePreset(e.target.dataset.delete);
                     renderPresets();
                     return;
                 }
-                // Load preset
                 const preset = presets.find(p => p.id === item.dataset.id);
                 if (preset) {
                     selectWorkoutType(preset.type);
-                    // Fill in values
                     Object.entries(preset.config).forEach(([key, value]) => {
                         const input = document.getElementById(key);
                         if (input) input.value = value;
@@ -317,12 +313,7 @@
     }
 
     // Expose for debugging
-    window.FitChrono = {
-        timer,
-        storage,
-        soundManager
-    };
+    window.FitChrono = { timer, storage, soundManager };
 
-    // Start app
     document.addEventListener('DOMContentLoaded', init);
 })();
