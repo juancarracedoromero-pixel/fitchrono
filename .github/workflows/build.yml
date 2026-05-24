@@ -27,11 +27,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Add Android Platform
-        run: npx cap add android
-      
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          rm -rf android
+          npx cap add android
+          npx cap sync android
       
       - name: Build APK
         run: |
