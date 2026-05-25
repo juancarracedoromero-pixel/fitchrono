@@ -436,6 +436,7 @@ let raf = null, lastSecond = -1;
 
 // Chrono-specific
 let chronoStartTime = 0, chronoElapsed = 0;
+let phaseStartTime = 0;
 
 // ── DOM ──
 const $ = id => document.getElementById(id);
@@ -589,8 +590,6 @@ function startEmom() {
   phaseStartTime = Date.now();
   tickEmomWork();
 }
-
-let phaseStartTime = 0;
 
 function tickEmomWork() {
   if (!running || paused) return;
