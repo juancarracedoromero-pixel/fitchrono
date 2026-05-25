@@ -424,6 +424,7 @@ function beep(freq = 880, dur = 150, type = 'sine') {
 
 function longBeep() { beep(660, 400, 'sine'); }
 function tickBeep() { beep(440, 60, 'square'); }
+function goBeep() { beep(1320, 350, 'sine'); }
 
 // ── STATE ──
 let mode = 'chrono'; // 'chrono' | 'emom'
@@ -517,7 +518,7 @@ function startCountdown(finalMode) {
       flashScreen($('flashCountdown'));
     } else {
       clearInterval(countInterval);
-      tickBeep();
+      goBeep();
       if (mode === 'chrono') startChrono();
       else startEmom();
     }
@@ -559,7 +560,7 @@ function tickEmom() {
   const currentSec = Math.floor(elapsed / 1000);
   if (currentSec !== lastSecond) {
     lastSecond = currentSec;
-    tickBeep();
+    // no per-second beep in chrono
   }
 
   raf = requestAnimationFrame(tickEmom);
