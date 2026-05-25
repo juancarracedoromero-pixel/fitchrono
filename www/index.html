@@ -1,128 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>FitChrono</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Chrono</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .chrono-display {
+      font-size: clamp(80px, 22vw, 140px);
+      font-weight: 300;
+      letter-spacing: -4px;
+      color: #fff;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .chrono-display.running { color: #00e676; }
+    .chrono-display.paused { color: #ff9100; }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-top: 60px;
+    }
+
+    .btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn:active { transform: scale(0.94); }
+
+    .btn-start {
+      background: #00e676;
+      color: #0a0a0a;
+    }
+
+    .btn-pause {
+      background: #ff9100;
+      color: #0a0a0a;
+      display: none;
+    }
+
+    .btn-reset {
+      background: #1a1a1a;
+      color: #555;
+      border: 1px solid #2a2a2a;
+    }
+
+    .btn-lap {
+      background: #1a1a1a;
+      color: #555;
+      border: 1px solid #2a2a2a;
+    }
+
+    .running .btn-start { display: none; }
+    .running .btn-pause { display: flex; }
+
+    .laps {
+      position: fixed;
+      bottom: 30px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 13px;
+      color: #444;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 0 20px;
+    }
+
+    .lap-time {
+      display: block;
+      margin: 5px 0;
+    }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: #00e676;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.08s;
+    }
+
+    .flash.on { opacity: 0.12; }
+
+    .label {
+      position: fixed;
+      top: 40px;
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: #333;
+      text-transform: uppercase;
+    }
+  </style>
 </head>
 <body>
-    <div id="screen-flash"></div>
-    
-    <div id="app">
-        <div id="home" class="screen active">
-            <header>
-                <h1>FITCHRONO</h1>
-                <div class="header-actions">
-                    <button id="settings-btn" class="icon-btn">⚙️</button>
-                    <button id="theme-btn" class="icon-btn">🌙</button>
-                </div>
-            </header>
-            
-            <div id="workout-selector" class="workout-grid">
-                <button class="workout-card" data-type="emom">
-                    <span class="emoji">⏱️</span>
-                    <span class="name">EMOM</span>
-                    <span class="desc">Cada Minuto</span>
-                </button>
-                <button class="workout-card" data-type="tabata">
-                    <span class="emoji">🔥</span>
-                    <span class="name">TABATA</span>
-                    <span class="desc">20/10 seg</span>
-                </button>
-                <button class="workout-card" data-type="amrap">
-                    <span class="emoji">♾️</span>
-                    <span class="name">AMRAP</span>
-                    <span class="desc">Rounds en X min</span>
-                </button>
-                <button class="workout-card" data-type="fortime">
-                    <span class="emoji">🏃</span>
-                    <span class="name">FOR TIME</span>
-                    <span class="desc">Time Cap</span>
-                </button>
-                <button class="workout-card" data-type="countdown">
-                    <span class="emoji">⏮️</span>
-                    <span class="name">COUNTDOWN</span>
-                    <span class="desc">Cuenta Atras</span>
-                </button>
-                <button class="workout-card" data-type="interval">
-                    <span class="emoji">🔄</span>
-                    <span class="name">INTERVAL</span>
-                    <span class="desc">Personalizado</span>
-                </button>
-            </div>
+  <div class="flash" id="flash"></div>
+  <span class="label">chronometer</span>
+  <div class="chrono-display" id="display">00:00.00</div>
 
-            <div id="config-section">
-                <div id="config-title">SELECCIONA Y CONFIGURA</div>
-                <div id="config-fields"></div>
-                <button id="start-btn" class="btn-primary">▶ INICIAR</button>
-            </div>
+  <div class="controls">
+    <button class="btn btn-start" id="btnStart">START</button>
+    <button class="btn btn-pause" id="btnPause">PAUSE</button>
+    <button class="btn btn-reset" id="btnReset">RESET</button>
+    <button class="btn btn-lap" id="btnLap">LAP</button>
+  </div>
 
-            <div id="presets-section">
-                <h3>⭐ Guardados</h3>
-                <div id="presets-list"></div>
-            </div>
-        </div>
+  <div class="laps" id="laps"></div>
 
-        <div id="timer-screen" class="screen">
-            <header>
-                <span id="workout-type-label">EMOM</span>
-                <div class="header-actions">
-                    <button id="mute-btn" class="icon-btn">🔊</button>
-                    <button id="back-btn" class="icon-btn">✕</button>
-                </div>
-            </header>
-            
-            <div id="timer-display">
-                <div id="time-main" class="blink">00:00</div>
-                <div id="time-rounds">Ronda 1/10</div>
-                <div id="time-phase" class="countdown">PREPÁRATE</div>
-            </div>
+  <script>
+    let startTime = 0, elapsed = 0, running = false, raf = null;
 
-            <div id="round-counter">
-                <button id="round-btn">+1 RONDA</button>
-            </div>
+    const display = document.getElementById('display');
+    const btnStart = document.getElementById('btnStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnReset = document.getElementById('btnReset');
+    const btnLap = document.getElementById('btnLap');
+    const laps = document.getElementById('laps');
+    const flash = document.getElementById('flash');
 
-            <div id="timer-controls">
-                <button id="pause-btn">⏸ PAUSA</button>
-                <button id="stop-btn">✕ PARAR</button>
-            </div>
-        </div>
+    function format(ms) {
+      const m = Math.floor(ms / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      const c = Math.floor((ms % 1000) / 10);
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(c).padStart(2,'0')}`;
+    }
 
-        <div id="settings-overlay" class="overlay">
-            <div class="overlay-content">
-                <h2>⚙️ AJUSTES</h2>
-                <div class="setting-row">
-                    <span>Sonido</span>
-                    <label class="toggle"><input type="checkbox" id="sound-toggle" checked><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <span>Vibración</span>
-                    <label class="toggle"><input type="checkbox" id="vibration-toggle" checked><span class="slider"></span></label>
-                </div>
-                <button id="close-settings" class="btn-primary">CERRAR</button>
-            </div>
-        </div>
+    function tick() {
+      elapsed = Date.now() - startTime;
+      display.textContent = format(elapsed);
+      raf = requestAnimationFrame(tick);
+    }
 
-        <div id="finished-overlay" class="overlay">
-            <div class="overlay-content">
-                <h2>🏁 FINISHED!</h2>
-                <div id="final-time">00:00</div>
-                <div id="final-rounds"></div>
-                <button id="done-btn" class="btn-primary">GUARDAR Y SALIR</button>
-            </div>
-        </div>
-    </div>
+    function flashScreen() {
+      flash.classList.add('on');
+      setTimeout(() => flash.classList.remove('on'), 120);
+    }
 
-    <script src="workouts.js"></script>
-    <script src="storage.js"></script>
-    <script src="sounds.js"></script>
-    <script src="timer.js"></script>
-    <script src="app.js"></script>
+    btnStart.addEventListener('click', () => {
+      running = true;
+      startTime = Date.now() - elapsed;
+      document.body.classList.add('running');
+      display.classList.add('running');
+      display.classList.remove('paused');
+      tick();
+      flashScreen();
+    });
+
+    btnPause.addEventListener('click', () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      document.body.classList.remove('running');
+      display.classList.remove('running');
+      display.classList.add('paused');
+      flashScreen();
+    });
+
+    btnReset.addEventListener('click', () => {
+      running = false;
+      elapsed = 0;
+      cancelAnimationFrame(raf);
+      display.textContent = '00:00.00';
+      document.body.classList.remove('running');
+      display.classList.remove('running', 'paused');
+      laps.innerHTML = '';
+    });
+
+    btnLap.addEventListener('click', () => {
+      if (!running) return;
+      const lap = document.createElement('span');
+      lap.className = 'lap-time';
+      lap.textContent = `#${laps.children.length + 1}  ${format(elapsed)}`;
+      laps.prepend(lap);
+    });
+  </script>
 </body>
 </html>
