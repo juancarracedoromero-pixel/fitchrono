@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Chrono</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>FitChrono EMOM</title>
   <link rel="manifest" href="manifest.json">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
@@ -28,185 +28,502 @@
       touch-action: manipulation;
     }
 
-    .chrono-display {
-      font-size: clamp(80px, 22vw, 140px);
+    /* ── CONFIG SCREEN ── */
+    #config-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 40px 20px;
+    }
+
+    .screen-title {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: #333;
+      text-transform: uppercase;
+    }
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .config-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .num-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1px solid #2a2a2a;
+      background: #141414;
+      color: #fff;
+      font-size: 20px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .num-btn:active { background: #2a2a2a; }
+
+    .config-value {
+      font-size: clamp(28px, 8vw, 40px);
+      font-weight: 300;
+      min-width: 80px;
+      text-align: center;
+      color: #00e676;
+    }
+
+    .unit-label {
+      font-size: 11px;
+      color: #444;
+      letter-spacing: 2px;
+    }
+
+    .start-big {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: none;
+      background: #00e676;
+      color: #0a0a0a;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.1s;
+      box-shadow: 0 0 30px rgba(0,230,118,0.3);
+    }
+
+    .start-big:active { transform: scale(0.95); }
+
+    /* ── TIMER SCREEN ── */
+    #timer-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 40px 20px;
+    }
+
+    .workout-label {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: #333;
+      text-transform: uppercase;
+    }
+
+    .phase-indicator {
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    .timer-display {
+      font-size: clamp(72px, 22vw, 130px);
       font-weight: 300;
       letter-spacing: -4px;
-      color: #fff;
       line-height: 1;
+      color: #00e676;
       transition: color 0.2s;
     }
 
-    .chrono-display.running { color: #00e676; }
-    .chrono-display.paused { color: #ff9100; }
+    .timer-display.warning { color: #ff9100; }
+    .timer-display.last-5 { color: #ff3d00; }
 
-    .controls {
-      display: flex;
-      gap: 20px;
-      margin-top: 60px;
+    .round-display {
+      font-size: 18px;
+      letter-spacing: 4px;
+      color: #444;
     }
 
-    .btn {
-      width: 80px;
-      height: 80px;
+    .progress-bar {
+      width: 80%;
+      max-width: 300px;
+      height: 3px;
+      background: #1a1a1a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #00e676;
+      transition: width 0.1s linear;
+      width: 0%;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .ctrl-btn {
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
-      border: none;
-      font-size: 12px;
+      border: 1px solid #2a2a2a;
+      background: #141414;
+      color: #666;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 1px;
+      font-family: inherit;
       cursor: pointer;
-      transition: transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: background 0.1s, color 0.1s;
     }
 
-    .btn:active { transform: scale(0.94); }
+    .ctrl-btn:active { background: #2a2a2a; color: #fff; }
 
-    .btn-start {
-      background: #00e676;
-      color: #0a0a0a;
+    .ctrl-btn.stop-btn {
+      border-color: #ff3d00;
+      color: #ff3d00;
     }
 
-    .btn-pause {
-      background: #ff9100;
-      color: #0a0a0a;
-      display: none;
-    }
+    .ctrl-btn.stop-btn:active { background: #ff3d00; color: #0a0a0a; }
 
-    .btn-reset {
-      background: #1a1a1a;
-      color: #555;
-      border: 1px solid #2a2a2a;
-    }
-
-    .btn-lap {
-      background: #1a1a1a;
-      color: #555;
-      border: 1px solid #2a2a2a;
-    }
-
-    .running .btn-start { display: none; }
-    .running .btn-pause { display: flex; }
-
-    .laps {
-      position: fixed;
-      bottom: 30px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: 13px;
-      color: #444;
-      max-height: 120px;
-      overflow-y: auto;
-      padding: 0 20px;
-    }
-
-    .lap-time {
-      display: block;
-      margin: 5px 0;
-    }
-
+    /* ── FLASH ── */
     .flash {
       position: fixed;
       inset: 0;
-      background: #00e676;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.08s;
     }
 
+    .flash.work { background: #00e676; }
+    .flash.rest { background: #ff9100; }
+    .flash.done { background: #ff3d00; }
     .flash.on { opacity: 0.12; }
 
-    .label {
-      position: fixed;
-      top: 40px;
-      font-size: 10px;
-      letter-spacing: 6px;
-      color: #333;
-      text-transform: uppercase;
+    /* ── FINISHED ── */
+    #finished-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 40px;
     }
+
+    .finished-title {
+      font-size: clamp(36px, 10vw, 64px);
+      font-weight: 300;
+      letter-spacing: 8px;
+      color: #00e676;
+    }
+
+    .finished-stats {
+      text-align: center;
+      color: #555;
+      font-size: 14px;
+      letter-spacing: 2px;
+      line-height: 2;
+    }
+
+    .done-big {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 1px solid #333;
+      background: #141414;
+      color: #666;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .done-big:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
-  <div class="flash" id="flash"></div>
-  <span class="label">chronometer</span>
-  <div class="chrono-display" id="display">00:00.00</div>
 
-  <div class="controls">
-    <button class="btn btn-start" id="btnStart">START</button>
-    <button class="btn btn-pause" id="btnPause">PAUSE</button>
-    <button class="btn btn-reset" id="btnReset">RESET</button>
-    <button class="btn btn-lap" id="btnLap">LAP</button>
+<div class="flash work" id="flashWork"></div>
+<div class="flash rest" id="flashRest"></div>
+<div class="flash done" id="flashDone"></div>
+
+<!-- CONFIG SCREEN -->
+<div id="config-screen">
+  <span class="screen-title">EMOM</span>
+
+  <div class="config-group">
+    <span class="config-label">Intervalo</span>
+    <div class="config-row">
+      <button class="num-btn" id="btn-mm-minus">−</button>
+      <span class="config-value" id="interval-min">1</span>
+      <button class="num-btn" id="btn-mm-plus">+</button>
+      <span class="unit-label">min</span>
+    </div>
+    <div class="config-row">
+      <button class="num-btn" id="btn-ss-minus">−</button>
+      <span class="config-value" id="interval-sec">00</span>
+      <button class="num-btn" id="btn-ss-plus">+</button>
+      <span class="unit-label">seg</span>
+    </div>
   </div>
 
-  <div class="laps" id="laps"></div>
+  <div class="config-group">
+    <span class="config-label">Rounds</span>
+    <div class="config-row">
+      <button class="num-btn" id="btn-r-minus">−</button>
+      <span class="config-value" id="round-count">10</span>
+      <button class="num-btn" id="btn-r-plus">+</button>
+    </div>
+  </div>
 
-  <script>
-    let startTime = 0, elapsed = 0, running = false, raf = null;
+  <button class="start-big" id="btnStart">START</button>
+</div>
 
-    const display = document.getElementById('display');
-    const btnStart = document.getElementById('btnStart');
-    const btnPause = document.getElementById('btnPause');
-    const btnReset = document.getElementById('btnReset');
-    const btnLap = document.getElementById('btnLap');
-    const laps = document.getElementById('laps');
-    const flash = document.getElementById('flash');
+<!-- TIMER SCREEN -->
+<div id="timer-screen">
+  <span class="workout-label">EMOM</span>
+  <span class="phase-indicator" id="phaseLabel">WORK</span>
+  <div class="timer-display" id="timerDisplay">00:00</div>
+  <div class="round-display" id="roundDisplay">1 / 10</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="timer-controls">
+    <button class="ctrl-btn" id="btnPause">PAUSE</button>
+    <button class="ctrl-btn stop-btn" id="btnStop">STOP</button>
+  </div>
+</div>
 
-    function format(ms) {
-      const m = Math.floor(ms / 60000);
-      const s = Math.floor((ms % 60000) / 1000);
-      const c = Math.floor((ms % 1000) / 10);
-      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(c).padStart(2,'0')}`;
+<!-- FINISHED SCREEN -->
+<div id="finished-screen">
+  <span class="finished-title">DONE</span>
+  <div class="finished-stats" id="finishedStats"></div>
+  <button class="done-big" id="btnDone">RESET</button>
+</div>
+
+<script>
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function beep(freq = 880, dur = 150, type = 'sine') {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur / 1000);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start(audioCtx.currentTime);
+  o.stop(audioCtx.currentTime + dur / 1000);
+}
+
+function longBeep() {
+  beep(660, 400, 'sine');
+}
+
+// ── STATE ──
+let intervalMin = 1, intervalSec = 0, rounds = 10;
+let totalIntervalMs = 0, currentRound = 0;
+let phaseStartTime = 0, pausedElapsed = 0;
+let running = false, paused = false;
+let raf = null, lastSecond = -1;
+
+// ── DOM ──
+const $ = id => document.getElementById(id);
+
+const configScreen = $('config-screen');
+const timerScreen = $('timer-screen');
+const finishedScreen = $('finished-screen');
+const flashWork = $('flashWork');
+const flashRest = $('flashRest');
+const flashDone = $('flashDone');
+
+// ── HELPERS ──
+function pad(n, len = 2) { return String(n).padStart(len, '0'); }
+
+function flashScreen(el) {
+  [flashWork, flashRest, flashDone].forEach(e => e.classList.remove('on'));
+  if (el) { el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 200); }
+}
+
+function showScreen(name) {
+  configScreen.style.display = 'none';
+  timerScreen.style.display = 'none';
+  finishedScreen.style.display = 'none';
+  if (name === 'config') configScreen.style.display = 'flex';
+  else if (name === 'timer') timerScreen.style.display = 'flex';
+  else if (name === 'finished') finishedScreen.style.display = 'flex';
+}
+
+// ── CONFIG ──
+function updateConfigUI() {
+  $('interval-min').textContent = intervalMin;
+  $('interval-sec').textContent = pad(intervalSec);
+  $('round-count').textContent = rounds;
+}
+
+$('btn-mm-minus').addEventListener('click', () => { if (intervalMin > 0) { intervalMin--; updateConfigUI(); }});
+$('btn-mm-plus').addEventListener('click', () => { if (intervalMin < 60) { intervalMin++; updateConfigUI(); }});
+$('btn-ss-minus').addEventListener('click', () => {
+  if (intervalSec >= 5) intervalSec -= 5;
+  else if (intervalSec > 0) intervalSec = 0;
+  else if (intervalMin > 0) { intervalMin--; intervalSec = 55; }
+  updateConfigUI();
+});
+$('btn-ss-plus').addEventListener('click', () => {
+  if (intervalSec < 55) intervalSec += 5;
+  else { intervalSec = 0; if (intervalMin < 60) intervalMin++; }
+  updateConfigUI();
+});
+$('btn-r-minus').addEventListener('click', () => { if (rounds > 1) { rounds--; updateConfigUI(); }});
+$('btn-r-plus').addEventListener('click', () => { if (rounds < 99) { rounds++; updateConfigUI(); }});
+
+// ── AUDIO CUE: 3-2-1 at end of each interval ──
+function playIntervalEndWarning(remainingMs, isLast5) {
+  if (remainingMs <= 3000 && remainingMs > 0) {
+    const sec = Math.ceil(remainingMs / 1000);
+    if (sec !== lastSecond) {
+      lastSecond = sec;
+      if (sec === 3 || sec === 2) beep(660, 80);
+      if (sec === 1) longBeep();
     }
+  }
+}
 
-    function tick() {
-      elapsed = Date.now() - startTime;
-      display.textContent = format(elapsed);
-      raf = requestAnimationFrame(tick);
+// ── START ──
+$('btnStart').addEventListener('click', () => {
+  totalIntervalMs = (intervalMin * 60 + intervalSec) * 1000;
+  if (totalIntervalMs === 0) return;
+  currentRound = 0;
+  pausedElapsed = 0;
+  running = true;
+  paused = false;
+  lastSecond = -1;
+
+  showScreen('timer');
+  $('phaseLabel').textContent = 'WORK';
+  $('roundDisplay').textContent = `1 / ${rounds}`;
+  $('progressFill').style.width = '0%';
+  $('timerDisplay').className = 'timer-display';
+
+  flashScreen(flashWork);
+  beep(880, 200);
+  startTimer();
+});
+
+function startTimer() {
+  phaseStartTime = Date.now() - pausedElapsed;
+  tick();
+}
+
+function tick() {
+  if (!running || paused) return;
+
+  const elapsed = Date.now() - phaseStartTime;
+  const remaining = Math.max(0, totalIntervalMs - elapsed);
+  const totalSec = Math.ceil(remaining / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+
+  $('timerDisplay').textContent = `${pad(m)}:${pad(s)}`;
+
+  // progress
+  const pct = (elapsed / totalIntervalMs) * 100;
+  $('progressFill').style.width = Math.min(100, pct) + '%';
+
+  // color warning
+  const disp = $('timerDisplay');
+  disp.classList.remove('warning', 'last-5');
+  if (remaining <= 5000) disp.classList.add('last-5');
+  else if (remaining <= 10000) disp.classList.add('warning');
+
+  // round update
+  const currentActual = Math.floor(elapsed / totalIntervalMs);
+  if (currentActual !== currentRound) {
+    currentRound = currentActual;
+    $('roundDisplay').textContent = `${currentRound + 1} / ${rounds}`;
+    flashScreen(flashWork);
+    beep(880, 200);
+
+    if (currentRound >= rounds) {
+      finishWorkout();
+      return;
     }
+  }
 
-    function flashScreen() {
-      flash.classList.add('on');
-      setTimeout(() => flash.classList.remove('on'), 120);
-    }
+  // 3-2-1 beep
+  playIntervalEndWarning(remaining, remaining <= 5000);
 
-    btnStart.addEventListener('click', () => {
-      running = true;
-      startTime = Date.now() - elapsed;
-      document.body.classList.add('running');
-      display.classList.add('running');
-      display.classList.remove('paused');
-      tick();
-      flashScreen();
-    });
+  raf = requestAnimationFrame(tick);
+}
 
-    btnPause.addEventListener('click', () => {
-      running = false;
-      cancelAnimationFrame(raf);
-      document.body.classList.remove('running');
-      display.classList.remove('running');
-      display.classList.add('paused');
-      flashScreen();
-    });
+// ── PAUSE/RESUME ──
+$('btnPause').addEventListener('click', () => {
+  if (!running) return;
+  if (!paused) {
+    paused = true;
+    pausedElapsed = Date.now() - phaseStartTime;
+    cancelAnimationFrame(raf);
+    $('btnPause').textContent = 'RESUME';
+    flashScreen(flashRest);
+  } else {
+    paused = false;
+    phaseStartTime = Date.now() - pausedElapsed;
+    $('btnPause').textContent = 'PAUSE';
+    flashScreen(flashWork);
+    tick();
+  }
+});
 
-    btnReset.addEventListener('click', () => {
-      running = false;
-      elapsed = 0;
-      cancelAnimationFrame(raf);
-      display.textContent = '00:00.00';
-      document.body.classList.remove('running');
-      display.classList.remove('running', 'paused');
-      laps.innerHTML = '';
-    });
+// ── STOP ──
+$('btnStop').addEventListener('click', () => {
+  running = false;
+  paused = false;
+  cancelAnimationFrame(raf);
+  showScreen('config');
+});
 
-    btnLap.addEventListener('click', () => {
-      if (!running) return;
-      const lap = document.createElement('span');
-      lap.className = 'lap-time';
-      lap.textContent = `#${laps.children.length + 1}  ${format(elapsed)}`;
-      laps.prepend(lap);
-    });
-  </script>
+function finishWorkout() {
+  running = false;
+  cancelAnimationFrame(raf);
+  flashScreen(flashDone);
+  longBeep();
+
+  const totalTime = (intervalMin * 60 + intervalSec) * rounds;
+  const m = Math.floor(totalTime / 60);
+  const s = totalTime % 60;
+
+  $('finishedStats').innerHTML =
+    `ROUNDS &nbsp; ${rounds}<br>` +
+    `INTERVAL &nbsp; ${intervalMin}m ${intervalSec}s<br>` +
+    `TOTAL &nbsp;&nbsp;&nbsp; ${m}m ${pad(s)}s`;
+
+  showScreen('finished');
+}
+
+// ── RESET ──
+$('btnDone').addEventListener('click', () => {
+  showScreen('config');
+  updateConfigUI();
+});
+
+// ── INIT ──
+updateConfigUI();
+showScreen('config');
+</script>
 </body>
 </html>
