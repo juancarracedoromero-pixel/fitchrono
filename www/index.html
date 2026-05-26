@@ -177,16 +177,18 @@
     }
 
     .workout-label {
-      font-size: 11px;
-      letter-spacing: 6px;
-      color: #555;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: #aaa;
       text-transform: uppercase;
     }
 
     .phase-indicator {
-      font-size: 12px;
-      letter-spacing: 4px;
-      color: #666;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: #bbb;
       text-transform: uppercase;
     }
 
@@ -204,9 +206,10 @@
     .timer-display.phase-work { color: #00e676; }
 
     .round-display {
-      font-size: 18px;
-      letter-spacing: 4px;
-      color: #777;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #999;
     }
 
     .progress-bar {
@@ -429,7 +432,7 @@ function goBeep() { beep(1320, 350, 'sine'); }
 // ── STATE ──
 let mode = 'chrono'; // 'chrono' | 'emom'
 let intervalMin = 1, intervalSec = 0, rounds = 10;
-let totalIntervalMs = 0, currentRound = 0;
+let totalIntervalMs = 0, currentRound = 0, lastRoundAtMs = 0;
 let startTime = 0, pausedElapsed = 0;
 let running = false, paused = false;
 let raf = null, lastSecond = -1;
@@ -611,11 +614,11 @@ function tickEmomWork() {
   else if (remaining <= 10000) disp.classList.add('warning');
   else disp.classList.add('phase-work');
 
-  const currentActual = Math.floor(elapsed / totalIntervalMs);
-  if (currentActual !== currentRound) {
-    currentRound = currentActual;
+  if (remaining <= 0 && lastRoundAtMs !== elapsed) {
+    lastRoundAtMs = elapsed;
+    currentRound++;
     phaseStartTime = Date.now();
-    $('roundDisplay').textContent = `${currentRound + 1} / ${rounds}`;
+    $('roundDisplay').textContent = `${currentRound} / ${rounds}`;
     flashScreen($('flashWork'));
     longBeep();
 
