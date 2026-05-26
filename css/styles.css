@@ -3,7 +3,7 @@
     --bg-primary: #000000;
     --bg-secondary: #1a1a1a;
     --text-primary: #ffffff;
-    --text-secondary: #888888;
+    --text-secondary: #b0b0b0;
     --accent: #ff5722;
     --accent-green: #4caf50;
     --accent-red: #f44336;
@@ -15,7 +15,7 @@
     --bg-primary: #ffffff;
     --bg-secondary: #f0f0f0;
     --text-primary: #000000;
-    --text-secondary: #666666;
+    --text-secondary: #444444;
     --accent: #e64a19;
     --accent-green: #388e3c;
     --accent-red: #d32f2f;
@@ -118,6 +118,7 @@ header h1 {
 .workout-card .desc {
     font-size: 10px;
     color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .workout-card.selected {

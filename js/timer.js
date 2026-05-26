@@ -118,15 +118,32 @@ class WorkoutTimer {
             }
         }
         
+        // Check for EMOM end of interval
+        if (this.workoutType === 'emom' && !this.isCountingUp) {
+            if (this.currentTime <= 0) {
+                this.currentRound++;
+                this.roundCount++;
+                this.currentTime = this.config.minutes * 60;
+                this.phaseTime = 0;
+                this.lastBeepMinute = -1;
+                if (this.onPhaseChange) this.onPhaseChange('work', this.currentRound);
+                if (this.currentRound > this.config.rounds) {
+                    this.finish();
+                    return;
+                }
+            }
+        }
+        
         // Check for phase transitions (Tabata, Interval)
         if ((this.workoutType === 'tabata' || this.workoutType === 'interval') && !this.isCountingUp) {
             if (this.currentTime <= 0) {
                 this.advancePhase();
+                return;
             }
         }
         
-        // Check for workout end (countdown modes)
-        if (!this.isCountingUp && this.currentTime <= 0) {
+        // Check for workout end (countdown modes - not EMOM, tabata, interval)
+        if (!this.isCountingUp && this.currentTime <= 0 && this.workoutType !== 'emom' && this.workoutType !== 'tabata' && this.workoutType !== 'interval') {
             this.finish();
             return;
         }
