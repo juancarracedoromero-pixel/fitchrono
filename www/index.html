@@ -614,6 +614,7 @@ function tickEmomWork() {
   const currentActual = Math.floor(elapsed / totalIntervalMs);
   if (currentActual !== currentRound) {
     currentRound = currentActual;
+    phaseStartTime = Date.now();
     $('roundDisplay').textContent = `${currentRound + 1} / ${rounds}`;
     flashScreen($('flashWork'));
     longBeep();
