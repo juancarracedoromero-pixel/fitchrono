@@ -614,10 +614,10 @@ function tickEmomWork() {
   else if (remaining <= 10000) disp.classList.add('warning');
   else disp.classList.add('phase-work');
 
-  if (remaining <= 0 && lastRoundAtMs !== elapsed) {
-    lastRoundAtMs = elapsed;
+  if (remaining <= 0) {
     currentRound++;
     phaseStartTime = Date.now();
+    lastRoundAtMs = 0;
     $('roundDisplay').textContent = `${currentRound} / ${rounds}`;
     flashScreen($('flashWork'));
     longBeep();
