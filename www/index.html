@@ -618,7 +618,7 @@ function tickEmomWork() {
     currentRound++;
     phaseStartTime = Date.now();
     lastRoundAtMs = 0;
-    $('roundDisplay').textContent = `${currentRound} / ${rounds}`;
+    $('roundDisplay').textContent = `${currentRound + 1} / ${rounds}`;
     flashScreen($('flashWork'));
     longBeep();
 
