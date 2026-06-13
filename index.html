@@ -16,39 +16,76 @@
         <!-- HOME SCREEN -->
         <div id="home" class="screen active">
             <header>
-                <h1>FitChrono</h1>
-                <button id="settings-btn" class="icon-btn">⚙️</button>
-                <button id="theme-btn" class="icon-btn">🌙</button>
+                <h1>FITCHRONO</h1>
+                <div style="display:flex;gap:6px;">
+                    <button id="settings-btn" class="icon-btn">⚙️</button>
+                    <button id="theme-btn" class="icon-btn">🌙</button>
+                </div>
             </header>
             
             <div id="workout-selector" class="workout-grid">
                 <button class="workout-card" data-type="emom">
-                    <span class="emoji">⏱️</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="18" cy="18" r="15" stroke="#ff3d00" stroke-width="2.5"/>
+                            <path d="M18 10v8l5 3" stroke="#ff3d00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="18" cy="18" r="2" fill="#ff3d00"/>
+                        </svg>
+                    </span>
                     <span class="name">EMOM</span>
                     <span class="desc">Cada Minuto</span>
                 </button>
                 <button class="workout-card" data-type="tabata">
-                    <span class="emoji">🔥</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 4L20.5 9.5H26L22 13.5L24 19L18 15.5L12 19L14 13.5L10 9.5H15.5L18 4Z" fill="#ff9100"/>
+                            <path d="M8 22h20M8 28h12" stroke="#ff9100" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <span class="name">TABATA</span>
                     <span class="desc">20/10</span>
                 </button>
                 <button class="workout-card" data-type="amrap">
-                    <span class="emoji">♾️</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 5C11.373 5 6 10.373 6 17s5.373 12 12 12 12-5.373 12-12S24.627 5 18 5z" stroke="#00e676" stroke-width="2.5"/>
+                            <path d="M18 11v7l4.5 4.5" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M26 17H30M24 13l4 4-4 4" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
                     <span class="name">AMRAP</span>
                     <span class="desc">Rounds en X min</span>
                 </button>
                 <button class="workout-card" data-type="fortime">
-                    <span class="emoji">🏃</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="18" cy="20" r="12" stroke="#00b0ff" stroke-width="2.5"/>
+                            <path d="M18 12v9l5 3" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 6l3 4M24 6l-3 4" stroke="#00b0ff" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <span class="name">FOR TIME</span>
                     <span class="desc">Time Cap</span>
                 </button>
                 <button class="workout-card" data-type="countdown">
-                    <span class="emoji">⏮️</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="8" width="20" height="20" rx="3" stroke="#e040fb" stroke-width="2.5"/>
+                            <path d="M18 14v6M18 22v2" stroke="#e040fb" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M13 4h10" stroke="#e040fb" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <span class="name">COUNTDOWN</span>
                     <span class="desc">Cuenta Atras</span>
                 </button>
                 <button class="workout-card" data-type="interval">
-                    <span class="emoji">🔄</span>
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 18a12 12 0 1 0 24 0A12 12 0 0 0 6 18Z" stroke="#ffd740" stroke-width="2.5"/>
+                            <path d="M18 10v8l5 3" stroke="#ffd740" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 18h6M24 18h6" stroke="#ffd740" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <span class="name">INTERVAL</span>
                     <span class="desc">Custom</span>
                 </button>
@@ -77,7 +114,13 @@
             </header>
             
             <div id="timer-display">
-                <div id="time-main">00:00</div>
+                <div class="timer-ring-container">
+                    <svg viewBox="0 0 276 276" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="timer-ring-bg" cx="138" cy="138" r="130"/>
+                        <circle class="timer-ring-progress" id="timer-ring" cx="138" cy="138" r="130"/>
+                    </svg>
+                    <div id="time-main">00:00</div>
+                </div>
                 <div id="time-rounds">Ronda 1/10</div>
                 <div id="time-phase">PREPÁRATE</div>
             </div>
@@ -114,8 +157,10 @@
 
         <!-- FINISHED OVERLAY -->
         <div id="finished-overlay" class="overlay">
+            <canvas id="confetti-canvas"></canvas>
             <div class="overlay-content finished">
                 <h2>🏁 FINISHED!</h2>
+                <div class="finished-subtitle">¡Buen trabajo!</div>
                 <div id="final-time">00:00</div>
                 <div id="final-rounds"></div>
                 <button id="done-btn" class="btn-primary">GUARDAR Y SALIR</button>

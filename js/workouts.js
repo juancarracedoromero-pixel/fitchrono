@@ -5,8 +5,8 @@ const WORKOUT_TYPES = {
         name: 'EMOM',
         description: 'Every Minute On the Minute',
         fields: [
-            { id: 'minutes', label: 'Duración (minutos)', type: 'number', default: 10, min: 1, max: 60 },
-            { id: 'rounds', label: 'Número de rondas', type: 'number', default: 10, min: 1, max: 100 }
+            { id: 'minutes', label: 'Duración (minutos)', type: 'number', default: 10, min: 1, max: 60, step: 1 },
+            { id: 'rounds', label: 'Número de rondas', type: 'number', default: 10, min: 1, max: 100, step: 1 }
         ],
         phases: ['work']
     },
@@ -14,9 +14,9 @@ const WORKOUT_TYPES = {
         name: 'TABATA',
         description: '20s trabajo / 10s descanso × 8',
         fields: [
-            { id: 'rounds', label: 'Rondas', type: 'number', default: 8, min: 1, max: 20 },
-            { id: 'work', label: 'Trabajo (segundos)', type: 'number', default: 20, min: 5, max: 120 },
-            { id: 'rest', label: 'Descanso (segundos)', type: 'number', default: 10, min: 5, max: 120 }
+            { id: 'rounds', label: 'Rondas', type: 'number', default: 8, min: 1, max: 20, step: 1 },
+            { id: 'work', label: 'Trabajo (segundos)', type: 'number', default: 20, min: 5, max: 120, step: 5 },
+            { id: 'rest', label: 'Descanso (segundos)', type: 'number', default: 10, min: 5, max: 120, step: 5 }
         ],
         phases: ['work', 'rest']
     },
@@ -24,8 +24,8 @@ const WORKOUT_TYPES = {
         name: 'AMRAP',
         description: 'As Many Rounds As Possible',
         fields: [
-            { id: 'minutes', label: 'Tiempo (minutos)', type: 'number', default: 12, min: 1, max: 60 },
-            { id: 'cap', label: 'Time Cap (min)', type: 'number', default: 12, min: 1, max: 120 }
+            { id: 'minutes', label: 'Tiempo (minutos)', type: 'number', default: 12, min: 1, max: 60, step: 1 },
+            { id: 'cap', label: 'Time Cap (min)', type: 'number', default: 12, min: 1, max: 120, step: 1 }
         ],
         phases: ['work']
     },
@@ -33,7 +33,7 @@ const WORKOUT_TYPES = {
         name: 'FOR TIME',
         description: 'Completar lo más rápido posible',
         fields: [
-            { id: 'cap', label: 'Time Cap (minutos)', type: 'number', default: 12, min: 1, max: 60 }
+            { id: 'cap', label: 'Time Cap (minutos)', type: 'number', default: 12, min: 1, max: 60, step: 1 }
         ],
         phases: ['work']
     },
@@ -41,7 +41,7 @@ const WORKOUT_TYPES = {
         name: 'COUNTDOWN',
         description: 'Cuenta atrás fija',
         fields: [
-            { id: 'seconds', label: 'Segundos', type: 'number', default: 10, min: 3, max: 600 }
+            { id: 'seconds', label: 'Segundos', type: 'number', default: 10, min: 3, max: 600, step: 5 }
         ],
         phases: ['work']
     },
@@ -49,9 +49,9 @@ const WORKOUT_TYPES = {
         name: 'INTERVAL',
         description: 'Intervalos personalizados',
         fields: [
-            { id: 'rounds', label: 'Número de intervalos', type: 'number', default: 8, min: 1, max: 50 },
-            { id: 'work', label: 'Trabajo (segundos)', type: 'number', default: 40, min: 5, max: 300 },
-            { id: 'rest', label: 'Descanso (segundos)', type: 'number', default: 20, min: 5, max: 300 }
+            { id: 'rounds', label: 'Número de intervalos', type: 'number', default: 8, min: 1, max: 50, step: 1 },
+            { id: 'work', label: 'Trabajo (segundos)', type: 'number', default: 40, min: 5, max: 300, step: 5 },
+            { id: 'rest', label: 'Descanso (segundos)', type: 'number', default: 20, min: 5, max: 300, step: 5 }
         ],
         phases: ['work', 'rest']
     }
@@ -70,9 +70,13 @@ function buildConfigHTML(type) {
         html += `
             <div class="config-field">
                 <label for="${field.id}">${field.label}</label>
-                <input type="number" id="${field.id}" 
-                    min="${field.min}" max="${field.max}" 
-                    value="${field.default}">
+                <div class="input-with-steppers">
+                    <button class="stepper-btn" data-field="${field.id}" data-delta="-${field.step}">−</button>
+                    <input type="number" id="${field.id}" 
+                        min="${field.min}" max="${field.max}" 
+                        value="${field.default}" data-step="${field.step}">
+                    <button class="stepper-btn" data-field="${field.id}" data-delta="${field.step}">+</button>
+                </div>
             </div>
         `;
     });
@@ -88,7 +92,6 @@ function getPhaseLabel(phase) {
     }
 }
 
-// Calculate total workout duration in seconds
 function calculateWorkoutDuration(type, config) {
     switch(type) {
         case 'emom':
@@ -107,7 +110,6 @@ function calculateWorkoutDuration(type, config) {
     }
 }
 
-// Format seconds to MM:SS or HH:MM:SS
 function formatTime(totalSeconds) {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
