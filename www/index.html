@@ -1,696 +1,177 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <title>FitChrono</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'JetBrains Mono', monospace;
-      background: #0a0a0a;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      -webkit-user-select: none;
-      user-select: none;
-      touch-action: manipulation;
-    }
-
-    /* ── MODE SELECTOR ── */
-    #mode-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      padding: 40px 20px;
-    }
-
-    .app-name {
-      font-size: 13px;
-      letter-spacing: 8px;
-      color: #888;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .mode-btn {
-      width: 220px;
-      height: 64px;
-      border-radius: 8px;
-      border: 1px solid #2a2a2a;
-      background: #111;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 4px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .mode-btn:active { background: #1a1a1a; border-color: #444; }
-
-    .mode-btn.emom { border-color: #00e676; color: #00e676; }
-
-    /* ── CONFIG SCREEN ── */
-    #config-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 28px;
-      padding: 40px 20px;
-    }
-
-    .screen-title {
-      font-size: 11px;
-      letter-spacing: 6px;
-      color: #666;
-      text-transform: uppercase;
-    }
-
-    .config-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .config-label {
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: #555;
-      text-transform: uppercase;
-    }
-
-    .config-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .num-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 1px solid #2a2a2a;
-      background: #141414;
-      color: #fff;
-      font-size: 20px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-
-    .num-btn:active { background: #2a2a2a; }
-
-    .config-value {
-      font-size: clamp(28px, 8vw, 40px);
-      font-weight: 300;
-      min-width: 80px;
-      text-align: center;
-      color: #fff;
-    }
-
-    .unit-label {
-      font-size: 11px;
-      color: #555;
-      letter-spacing: 2px;
-    }
-
-    .start-big {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: none;
-      background: #00e676;
-      color: #0a0a0a;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      font-family: inherit;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: transform 0.1s;
-      box-shadow: 0 0 30px rgba(0,230,118,0.3);
-    }
-
-    .start-big:active { transform: scale(0.95); }
-
-    .back-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid #2a2a2a;
-      background: #111;
-      color: #555;
-      font-size: 16px;
-      font-family: inherit;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ── TIMER SCREEN ── */
-    #timer-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 40px 20px;
-    }
-
-    .workout-label {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 4px;
-      color: #aaa;
-      text-transform: uppercase;
-    }
-
-    .phase-indicator {
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      color: #bbb;
-      text-transform: uppercase;
-    }
-
-    .timer-display {
-      font-size: clamp(72px, 22vw, 130px);
-      font-weight: 300;
-      letter-spacing: -4px;
-      line-height: 1;
-      color: #fff;
-      transition: color 0.2s;
-    }
-
-    .timer-display.warning { color: #ff9100; }
-    .timer-display.last-5 { color: #ff3d00; }
-    .timer-display.phase-work { color: #00e676; }
-
-    .round-display {
-      font-size: 28px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      color: #999;
-    }
-
-    .progress-bar {
-      width: 80%;
-      max-width: 300px;
-      height: 3px;
-      background: #1a1a1a;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: #fff;
-      transition: width 0.1s linear;
-      width: 0%;
-    }
-
-    .timer-controls {
-      display: flex;
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .ctrl-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: 1px solid #2a2a2a;
-      background: #141414;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-
-    .ctrl-btn:active { background: #2a2a2a; }
-
-    .ctrl-btn.stop-btn {
-      border-color: #ff3d00;
-      color: #ff3d00;
-    }
-
-    /* ── COUNTDOWN ── */
-    #countdown-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    .countdown-num {
-      font-size: clamp(100px, 35vw, 200px);
-      font-weight: 200;
-      letter-spacing: -8px;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .countdown-hint {
-      font-size: 11px;
-      letter-spacing: 6px;
-      color: #444;
-      text-transform: uppercase;
-    }
-
-    /* ── FLASH ── */
-    .flash {
-      position: fixed;
-      inset: 0;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.08s;
-    }
-
-    .flash.work { background: #00e676; }
-    .flash.countdown { background: #fff; }
-    .flash.on { opacity: 0.1; }
-
-    /* ── FINISHED ── */
-    #finished-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 30px;
-      padding: 40px;
-    }
-
-    .finished-title {
-      font-size: clamp(36px, 10vw, 64px);
-      font-weight: 300;
-      letter-spacing: 8px;
-      color: #00e676;
-    }
-
-    .finished-stats {
-      text-align: center;
-      color: #888;
-      font-size: 14px;
-      letter-spacing: 2px;
-      line-height: 2;
-    }
-
-    .done-big {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 1px solid #333;
-      background: #141414;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .done-big:active { transform: scale(0.95); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>FitChrono - Cronómetro de Entrenamiento</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
 </head>
 <body>
+    <div id="app">
+        <!-- HOME SCREEN -->
+        <div id="home" class="screen active">
+            <header>
+                <h1>FITCHRONO</h1>
+                <div style="display:flex;gap:6px;">
+                    <button id="settings-btn" class="icon-btn">⚙️</button>
+                    <button id="theme-btn" class="icon-btn">🌙</button>
+                </div>
+            </header>
+            
+            <div id="workout-selector" class="workout-grid">
+                <button class="workout-card" data-type="emom">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="18" cy="18" r="15" stroke="#ff3d00" stroke-width="2.5"/>
+                            <path d="M18 10v8l5 3" stroke="#ff3d00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="18" cy="18" r="2" fill="#ff3d00"/>
+                        </svg>
+                    </span>
+                    <span class="name">EMOM</span>
+                    <span class="desc">Cada Minuto</span>
+                </button>
+                <button class="workout-card" data-type="tabata">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 4L20.5 9.5H26L22 13.5L24 19L18 15.5L12 19L14 13.5L10 9.5H15.5L18 4Z" fill="#ff9100"/>
+                            <path d="M8 22h20M8 28h12" stroke="#ff9100" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="name">TABATA</span>
+                    <span class="desc">20/10</span>
+                </button>
+                <button class="workout-card" data-type="amrap">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 5C11.373 5 6 10.373 6 17s5.373 12 12 12 12-5.373 12-12S24.627 5 18 5z" stroke="#00e676" stroke-width="2.5"/>
+                            <path d="M18 11v7l4.5 4.5" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M26 17H30M24 13l4 4-4 4" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="name">AMRAP</span>
+                    <span class="desc">Rounds en X min</span>
+                </button>
+                <button class="workout-card" data-type="fortime">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="18" cy="20" r="12" stroke="#00b0ff" stroke-width="2.5"/>
+                            <path d="M18 12v9l5 3" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 6l3 4M24 6l-3 4" stroke="#00b0ff" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="name">FOR TIME</span>
+                    <span class="desc">Time Cap</span>
+                </button>
+                <button class="workout-card" data-type="countdown">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="8" width="20" height="20" rx="3" stroke="#e040fb" stroke-width="2.5"/>
+                            <path d="M18 14v6M18 22v2" stroke="#e040fb" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M13 4h10" stroke="#e040fb" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="name">COUNTDOWN</span>
+                    <span class="desc">Cuenta Atras</span>
+                </button>
+                <button class="workout-card" data-type="interval">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 18a12 12 0 1 0 24 0A12 12 0 0 0 6 18Z" stroke="#ffd740" stroke-width="2.5"/>
+                            <path d="M18 10v8l5 3" stroke="#ffd740" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 18h6M24 18h6" stroke="#ffd740" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="name">INTERVAL</span>
+                    <span class="desc">Custom</span>
+                </button>
+            </div>
 
-<div class="flash work" id="flashWork"></div>
-<div class="flash countdown" id="flashCountdown"></div>
+            <div id="config-section" class="config-hidden">
+                <h2 id="config-title">Configura tu Workout</h2>
+                <div id="config-fields"></div>
+                <button id="start-btn" class="btn-primary">▶ INICIAR</button>
+            </div>
 
-<!-- MODE SCREEN -->
-<div id="mode-screen">
-  <span class="app-name">FITCHRONO</span>
-  <button class="mode-btn" id="btnChrono">CHRONO</button>
-  <button class="mode-btn emom" id="btnEmom">EMOM</button>
-</div>
+            <div id="presets-section">
+                <h3>⭐ Presets</h3>
+                <div id="presets-list"></div>
+            </div>
+        </div>
 
-<!-- CONFIG SCREEN (EMOM) -->
-<div id="config-screen">
-  <button class="back-btn" id="btnBack">←</button>
-  <span class="screen-title">EMOM</span>
+        <!-- TIMER SCREEN -->
+        <div id="timer-screen" class="screen">
+            <header>
+                <span id="workout-type-label">EMOM</span>
+                <div>
+                    <button id="mute-btn" class="icon-btn">🔊</button>
+                    <button id="back-btn" class="icon-btn">⬅️</button>
+                </div>
+            </header>
+            
+            <div id="timer-display">
+                <div class="timer-ring-container">
+                    <svg viewBox="0 0 276 276" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="timer-ring-bg" cx="138" cy="138" r="130"/>
+                        <circle class="timer-ring-progress" id="timer-ring" cx="138" cy="138" r="130"/>
+                    </svg>
+                    <div id="time-main">00:00</div>
+                </div>
+                <div id="time-rounds">Ronda 1/10</div>
+                <div id="time-phase">PREPÁRATE</div>
+            </div>
 
-  <div class="config-group">
-    <span class="config-label">Intervalo</span>
-    <div class="config-row">
-      <button class="num-btn" id="btn-mm-minus">−</button>
-      <span class="config-value" id="interval-min">1</span>
-      <button class="num-btn" id="btn-mm-plus">+</button>
-      <span class="unit-label">min</span>
+            <div id="timer-controls">
+                <button id="pause-btn" class="btn-secondary">⏸ PAUSA</button>
+                <button id="stop-btn" class="btn-danger">⏹ PARAR</button>
+            </div>
+
+            <div id="round-counter">
+                <button id="round-btn" class="btn-round">+1 RONDA</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS OVERLAY -->
+        <div id="settings-overlay" class="overlay">
+            <div class="overlay-content">
+                <h2>⚙️ Ajustes</h2>
+                <div class="setting-row">
+                    <span>Sonido</span>
+                    <label class="toggle"><input type="checkbox" id="sound-toggle" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Vibración</span>
+                    <label class="toggle"><input type="checkbox" id="vibration-toggle" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Tema oscuro</span>
+                    <label class="toggle"><input type="checkbox" id="dark-toggle" checked><span class="slider"></span></label>
+                </div>
+                <button id="close-settings" class="btn-secondary">Cerrar</button>
+            </div>
+        </div>
+
+        <!-- FINISHED OVERLAY -->
+        <div id="finished-overlay" class="overlay">
+            <canvas id="confetti-canvas"></canvas>
+            <div class="overlay-content finished">
+                <h2>🏁 FINISHED!</h2>
+                <div class="finished-subtitle">¡Buen trabajo!</div>
+                <div id="final-time">00:00</div>
+                <div id="final-rounds"></div>
+                <button id="done-btn" class="btn-primary">GUARDAR Y SALIR</button>
+            </div>
+        </div>
     </div>
-    <div class="config-row">
-      <button class="num-btn" id="btn-ss-minus">−</button>
-      <span class="config-value" id="interval-sec">00</span>
-      <button class="num-btn" id="btn-ss-plus">+</button>
-      <span class="unit-label">seg</span>
-    </div>
-  </div>
 
-  <div class="config-group">
-    <span class="config-label">Rounds</span>
-    <div class="config-row">
-      <button class="num-btn" id="btn-r-minus">−</button>
-      <span class="config-value" id="round-count">10</span>
-      <button class="num-btn" id="btn-r-plus">+</button>
-    </div>
-  </div>
-
-  <button class="start-big" id="btnStart">START</button>
-</div>
-
-<!-- COUNTDOWN SCREEN -->
-<div id="countdown-screen">
-  <span class="countdown-hint">get ready</span>
-  <div class="countdown-num" id="countdownNum">10</div>
-</div>
-
-<!-- TIMER SCREEN -->
-<div id="timer-screen">
-  <span class="workout-label" id="modeLabel">EMOM</span>
-  <span class="phase-indicator" id="phaseLabel">WORK</span>
-  <div class="timer-display" id="timerDisplay">00:00</div>
-  <div class="round-display" id="roundDisplay">1 / 10</div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="timer-controls">
-    <button class="ctrl-btn" id="btnPause">PAUSE</button>
-    <button class="ctrl-btn stop-btn" id="btnStop">STOP</button>
-  </div>
-</div>
-
-<!-- FINISHED SCREEN -->
-<div id="finished-screen">
-  <span class="finished-title">DONE</span>
-  <div class="finished-stats" id="finishedStats"></div>
-  <button class="done-big" id="btnDone">RESET</button>
-</div>
-
-<script>
-const audioCtx = new (window.AudioKey = window.AudioContext || window.webkitAudioContext)();
-
-function beep(freq = 880, dur = 150, type = 'sine') {
-  try {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.25, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur / 1000);
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start(audioCtx.currentTime);
-    o.stop(audioCtx.currentTime + dur / 1000);
-  } catch(e) {}
-}
-
-function longBeep() { beep(660, 400, 'sine'); }
-function tickBeep() { beep(440, 60, 'square'); }
-function goBeep() { beep(1320, 350, 'sine'); }
-
-// ── STATE ──
-let mode = 'chrono'; // 'chrono' | 'emom'
-let intervalMin = 1, intervalSec = 0, rounds = 10;
-let totalIntervalMs = 0, currentRound = 0, lastRoundAtMs = 0;
-let startTime = 0, pausedElapsed = 0;
-let running = false, paused = false;
-let raf = null, lastSecond = -1;
-
-// Chrono-specific
-let chronoStartTime = 0, chronoElapsed = 0;
-let phaseStartTime = 0;
-
-// ── DOM ──
-const $ = id => document.getElementById(id);
-
-const modeScreen = $('mode-screen');
-const configScreen = $('config-screen');
-const countdownScreen = $('countdown-screen');
-const timerScreen = $('timer-screen');
-const finishedScreen = $('finished-screen');
-
-// ── HELPERS ──
-function pad(n, len = 2) { return String(n).padStart(len, '0'); }
-
-function flashScreen(el) {
-  if (el) { el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 150); }
-}
-
-function showScreen(name) {
-  [modeScreen, configScreen, countdownScreen, timerScreen, finishedScreen]
-    .forEach(s => s.style.display = 'none');
-  if (name === 'mode') modeScreen.style.display = 'flex';
-  else if (name === 'config') configScreen.style.display = 'flex';
-  else if (name === 'countdown') countdownScreen.style.display = 'flex';
-  else if (name === 'timer') timerScreen.style.display = 'flex';
-  else if (name === 'finished') finishedScreen.style.display = 'flex';
-}
-
-function updateConfigUI() {
-  $('interval-min').textContent = intervalMin;
-  $('interval-sec').textContent = pad(intervalSec);
-  $('round-count').textContent = rounds;
-}
-
-// ── MODE SELECTION ──
-$('btnChrono').addEventListener('click', () => {
-  mode = 'chrono';
-  startCountdown('chrono');
-});
-
-$('btnEmom').addEventListener('click', () => {
-  mode = 'emom';
-  showScreen('config');
-  updateConfigUI();
-});
-
-$('btnBack').addEventListener('click', () => showScreen('mode'));
-
-// ── CONFIG (EMOM) ──
-$('btn-mm-minus').addEventListener('click', () => { if (intervalMin > 0) { intervalMin--; updateConfigUI(); }});
-$('btn-mm-plus').addEventListener('click', () => { if (intervalMin < 60) { intervalMin++; updateConfigUI(); }});
-$('btn-ss-minus').addEventListener('click', () => {
-  if (intervalSec >= 5) intervalSec -= 5;
-  else if (intervalSec > 0) intervalSec = 0;
-  else if (intervalMin > 0) { intervalMin--; intervalSec = 55; }
-  updateConfigUI();
-});
-$('btn-ss-plus').addEventListener('click', () => {
-  if (intervalSec < 55) intervalSec += 5;
-  else { intervalSec = 0; if (intervalMin < 60) intervalMin++; }
-  updateConfigUI();
-});
-$('btn-r-minus').addEventListener('click', () => { if (rounds > 1) { rounds--; updateConfigUI(); }});
-$('btn-r-plus').addEventListener('click', () => { if (rounds < 99) { rounds++; updateConfigUI(); }});
-
-$('btnStart').addEventListener('click', () => startCountdown('emom'));
-
-// ── 10-SECOND COUNTDOWN ──
-function startCountdown(finalMode) {
-  mode = finalMode;
-  showScreen('countdown');
-  let count = 10;
-  $('countdownNum').textContent = count;
-  flashScreen($('flashCountdown'));
-
-  const countInterval = setInterval(() => {
-    count--;
-    if (count > 0) {
-      $('countdownNum').textContent = count;
-      tickBeep();
-      flashScreen($('flashCountdown'));
-    } else {
-      clearInterval(countInterval);
-      goBeep();
-      if (mode === 'chrono') startChrono();
-      else startEmom();
-    }
-  }, 1000);
-}
-
-// ── CHRONO MODE ──
-function startChrono() {
-  chronoStartTime = Date.now();
-  chronoElapsed = 0;
-  running = true;
-  paused = false;
-  lastSecond = -1;
-
-  showScreen('timer');
-  $('modeLabel').textContent = 'CHRONO';
-  $('phaseLabel').textContent = '';
-  $('roundDisplay').textContent = '';
-  $('progressFill').style.width = '0%';
-  $('timerDisplay').className = 'timer-display';
-
-  tickEmom();
-}
-
-function tickEmom() {
-  if (!running || paused) return;
-  const elapsed = Date.now() - chronoStartTime;
-  const totalSec = Math.ceil(elapsed / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = totalSec % 60;
-
-  $('timerDisplay').textContent = `${pad(m)}:${pad(s)}`;
-
-  // progress bar cycles every minute
-  const pct = ((elapsed % 60000) / 60000) * 100;
-  $('progressFill').style.width = pct + '%';
-
-  // tick sound every second
-  const currentSec = Math.floor(elapsed / 1000);
-  if (currentSec !== lastSecond) {
-    lastSecond = currentSec;
-    // no per-second beep in chrono
-  }
-
-  raf = requestAnimationFrame(tickEmom);
-}
-
-// ── EMOM MODE ──
-function startEmom() {
-  totalIntervalMs = (intervalMin * 60 + intervalSec) * 1000;
-  if (totalIntervalMs === 0) { showScreen('mode'); return; }
-  currentRound = 0;
-  pausedElapsed = 0;
-  running = true;
-  paused = false;
-  lastSecond = -1;
-
-  showScreen('timer');
-  $('modeLabel').textContent = 'EMOM';
-  $('phaseLabel').textContent = 'WORK';
-  $('roundDisplay').textContent = `1 / ${rounds}`;
-  $('progressFill').style.width = '0%';
-  $('timerDisplay').className = 'timer-display phase-work';
-  $('timerDisplay').classList.remove('warning', 'last-5');
-
-  flashScreen($('flashWork'));
-  longBeep();
-  phaseStartTime = Date.now();
-  tickEmomWork();
-}
-
-function tickEmomWork() {
-  if (!running || paused) return;
-
-  const elapsed = Date.now() - phaseStartTime;
-  const remaining = Math.max(0, totalIntervalMs - elapsed);
-  const totalSec = Math.ceil(remaining / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = totalSec % 60;
-
-  $('timerDisplay').textContent = `${pad(m)}:${pad(s)}`;
-
-  const pct = (elapsed / totalIntervalMs) * 100;
-  $('progressFill').style.width = Math.min(100, pct) + '%';
-
-  const disp = $('timerDisplay');
-  disp.classList.remove('warning', 'last-5', 'phase-work');
-  if (remaining <= 5000) disp.classList.add('last-5');
-  else if (remaining <= 10000) disp.classList.add('warning');
-  else disp.classList.add('phase-work');
-
-  if (remaining <= 0) {
-    currentRound++;
-    phaseStartTime = Date.now();
-    lastRoundAtMs = 0;
-    $('roundDisplay').textContent = `${currentRound + 1} / ${rounds}`;
-    flashScreen($('flashWork'));
-    longBeep();
-
-    if (currentRound >= rounds) {
-      finishWorkout();
-      return;
-    }
-  }
-
-  // 3-2-1
-  if (remaining <= 3000 && remaining > 0) {
-    const sec = Math.ceil(remaining / 1000);
-    if (sec !== lastSecond) {
-      lastSecond = sec;
-      if (sec === 3 || sec === 2) beep(660, 80);
-      if (sec === 1) longBeep();
-    }
-  }
-
-  raf = requestAnimationFrame(tickEmomWork);
-}
-
-// ── PAUSE/RESUME ──
-$('btnPause').addEventListener('click', () => {
-  if (!running) return;
-  if (!paused) {
-    paused = true;
-    pausedElapsed = Date.now() - (mode === 'chrono' ? chronoStartTime : phaseStartTime);
-    cancelAnimationFrame(raf);
-    $('btnPause').textContent = 'RESUME';
-  } else {
-    paused = false;
-    if (mode === 'chrono') {
-      chronoStartTime = Date.now() - chronoElapsed;
-      tickEmom();
-    } else {
-      phaseStartTime = Date.now() - pausedElapsed;
-      tickEmomWork();
-    }
-    $('btnPause').textContent = 'PAUSE';
-  }
-});
-
-$('btnStop').addEventListener('click', () => {
-  running = false;
-  paused = false;
-  cancelAnimationFrame(raf);
-  showScreen('mode');
-});
-
-function finishWorkout() {
-  running = false;
-  cancelAnimationFrame(raf);
-  flashScreen($('flashWork'));
-  longBeep();
-
-  const totalTime = (intervalMin * 60 + intervalSec) * rounds;
-  const m = Math.floor(totalTime / 60);
-  const s = totalTime % 60;
-
-  $('finishedStats').innerHTML =
-    `ROUNDS &nbsp; ${rounds}<br>` +
-    `INTERVAL &nbsp; ${intervalMin}m ${intervalSec}s<br>` +
-    `TOTAL &nbsp;&nbsp;&nbsp; ${m}m ${pad(s)}s`;
-
-  showScreen('finished');
-}
-
-$('btnDone').addEventListener('click', () => showScreen('mode'));
-
-// ── INIT ──
-showScreen('mode');
-</script>
+    <script src="js/workouts.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
