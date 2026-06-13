@@ -16,10 +16,30 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        debug {
+            storeFile file('fitchrono-release.p12')
+            storePassword 'fitchrono2026'
+            keyAlias 'fitchrono'
+            keyPassword 'fitchrono2026'
+            storetype 'pkcs12'
+        }
+        release {
+            storeFile file('fitchrono-release.p12')
+            storePassword 'fitchrono2026'
+            keyAlias 'fitchrono'
+            keyPassword 'fitchrono2026'
+            storetype 'pkcs12'
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
