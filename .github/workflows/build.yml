@@ -29,9 +29,11 @@ jobs:
       
       - name: Sync Capacitor
         run: |
-          rm -rf android
-          npx cap add android
+          if [ ! -d "android" ]; then npx cap add android; fi
           npx cap sync android
+      
+      - name: Apply signing config
+        run: python3 scripts/apply-signing.py android/app/build.gradle
       
       - name: Build APK
         run: |
