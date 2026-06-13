@@ -14,7 +14,7 @@ signing_block = '''
             storePassword 'fitchrono2026'
             keyAlias 'fitchrono'
             keyPassword 'fitchrono2026'
-            storetype 'pkcs12'
+            storeType 'pkcs12'
         }
     }
 '''

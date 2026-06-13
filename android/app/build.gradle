@@ -22,14 +22,14 @@ android {
             storePassword 'fitchrono2026'
             keyAlias 'fitchrono'
             keyPassword 'fitchrono2026'
-            storetype 'pkcs12'
+            storeType 'pkcs12'
         }
         release {
             storeFile file('fitchrono-release.p12')
             storePassword 'fitchrono2026'
             keyAlias 'fitchrono'
             keyPassword 'fitchrono2026'
-            storetype 'pkcs12'
+            storeType 'pkcs12'
         }
     }
     buildTypes {
